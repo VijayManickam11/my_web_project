@@ -9,7 +9,7 @@ module.exports.TextGetApi = async (req, res, next) => {
 
     const userText = await UserText.find({user:new mongoose.Types.ObjectId(req.params.id)})
 
-    console.log(userText,"userTextsGet")
+    // console.log(userText,"userTextsGet")
     
     if(!userText){
      return res.json({message:"User Not Found"})

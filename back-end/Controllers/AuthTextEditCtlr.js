@@ -5,20 +5,18 @@ const mongoose = require('mongoose');
 module.exports.TextEditApi = async (req, res, next) => {
   try {
 
-    console.log(req.params.id,"getTheReq")
-
-    console.log(req.body,"editTheReq")
-
-
+    
+    const { textInput } = req.body;
+    
     const id = req.params.id;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid ID format" });
     }
 
-    const userText = await UserText.findByIdAndUpdate(id,{ $set: req.body },{ new: true } )
+    const userText = await UserText.findByIdAndUpdate(id,{ inputText : textInput },{ new: true } )
 
-    console.log(userText,"userTextsGet")
+    
     
     if(!userText){
      return res.json({message:"User Not Found"})

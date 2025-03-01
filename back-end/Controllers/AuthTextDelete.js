@@ -3,12 +3,7 @@ const mongoose = require('mongoose');
 
 
 module.exports.TextDeleteApi = async (req, res, next) => {
-  try {
-
-    console.log(req.params.id,"getTheReq")
-
-    console.log(req.body,"editTheReq")
-
+  try {  
 
     const id = req.params.id;
 
@@ -18,7 +13,7 @@ module.exports.TextDeleteApi = async (req, res, next) => {
 
     const userText = await UserText.findByIdAndDelete(id)
 
-    console.log(userText,"userTextsGet")
+    // console.log(userText,"userTextsGet")
     
     if(!userText){
      return res.json({message:"User Not Found"})
