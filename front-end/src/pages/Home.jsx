@@ -45,7 +45,11 @@ const Home = () => {
   let username = localStorage.getItem("getTheUerName") 
   let UserID = localStorage.getItem("getTheUserId")
   const [getTheValue, setGetTheValue] = useState([]);
+  const [editButton, setEditButton] = useState(false);
+  const [getTheId, setGetTheId] = useState("");
+
   console.log(localStorage.getItem("getTheUerName"),"usernameHome")
+
   const Logout = () => {
     removeCookie("token");
     navigate("/signup");
@@ -55,34 +59,6 @@ const Home = () => {
     setInputText(e.target.value)
 
   }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      let sendTheData = {
-        textInput:textInput,
-        UserID:UserID
-      }
-      console.log(textInput,"textInput")
-      const { data } = await axios.post(
-        "http://localhost:8080/saveInput",
-        { sendTheData }
-        
-      );
-      console.log(data,"homePgae")
-      const { success, message } = data;
-      if (success) { 
-        setInputText("")       
-        ToastService.successmsg(message);        
-       
-      } else {
-        ToastService.errormsg(message);
-      }
-    } catch (error) {
-      ToastService.errormsg("An error occurred!");
-    }
-   
-  };
 
   const getTheTextValueApi = async () => {
     try {
@@ -111,6 +87,111 @@ const Home = () => {
   },[UserID])
 
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+
+      let sendTheData = {
+        textInput:textInput,
+        UserID:UserID
+      }
+
+      let sendTheEditData = {
+        textInput:textInput,
+        id:getTheId
+      }
+
+      console.log(sendTheEditData,"sendTheEditData")
+
+      if(!editButton){
+
+        const { data } = await axios.post("http://localhost:8080/saveInput",{ sendTheData } );  
+        
+        const { success, message } = data;
+        if (success) { 
+          
+          setInputText("")   
+
+          ToastService.successmsg(message);        
+         
+        } else {
+          
+          ToastService.errormsg(message);
+
+        }
+
+      }else{
+
+        const { data } = await axios.put(`http://localhost:8080/updateInputValue/${getTheId}`, sendTheEditData);  
+        
+        const { success, message } = data;
+
+        if (success) { 
+
+          setInputText("") ;
+
+          getTheTextValueApi();
+
+          setEditButton(false);
+
+          ToastService.successmsg(message);        
+         
+        } else {
+
+          ToastService.errormsg(message);
+          
+        }
+      }
+
+      
+    } catch (error) {
+      ToastService.errormsg("An error occurred!");
+    }
+   
+  }; 
+
+ 
+
+  const handleEditButton = (row) => {  
+    if(row){
+      setEditButton(true);
+      setInputText(row?.inputText);
+      setGetTheId(row?._id)
+    }
+  }
+
+  const handleDeleteButton = async (id) => {
+
+    if(id){
+
+      try {       
+  
+          const { data } = await axios.delete(`http://localhost:8080/deleteInputValue/${id}`);  
+          
+          const { success, message } = data;
+          if (success) {        
+  
+            ToastService.successmsg(message);  
+            
+            getTheTextValueApi();
+           
+          } else {
+            
+            ToastService.errormsg(message);
+  
+          }   
+  
+        
+      } catch (error) {
+        ToastService.errormsg("Delete Data error occurred!");
+      }
+
+    }else{
+      console.log("Erorr")
+    }    
+
+  }
+
   return (
     <>
       <div className="home_page">
@@ -121,7 +202,7 @@ const Home = () => {
         <button onClick={Logout}>LOGOUT</button>
         <form onSubmit={handleSubmit}>
         <div>
-          <input className="input-new" name="textBox" type="text" value={textInput} onChange={handleOnclike} placeholder="Enter Your Text"/> <button type="submit" className="button-new"> Save </button>
+          <input className="input-new" name="textBox" type="text" value={textInput} onChange={handleOnclike} placeholder="Enter Your Text"/> <button type="submit" className="button-new">{ !editButton ? "Save" : "Update" }</button>
         </div>
         </form>
       </div>
@@ -144,8 +225,8 @@ const Home = () => {
                 {row?.inputText}
               </StyledTableCell>
               <StyledTableCell align="right">
-                <button style={{padding:5,backgroundColor:"goldenrod",border:"0px",fontSize:"14px",borderRadius:"5px",width:"70px",color:"white"}}>Edit</button>
-                <button style={{marginLeft:"10px",padding:5,backgroundColor:"red",border:"0px",fontSize:"14px",borderRadius:"5px",width:"70px",color:"white"}}>Delete</button>
+                <button style={{padding:5,backgroundColor:"goldenrod",border:"0px",fontSize:"14px",borderRadius:"5px",width:"70px",color:"white"}} onClick={()=>{handleEditButton(row)}}>Edit</button>
+                <button style={{marginLeft:"10px",padding:5,backgroundColor:"red",border:"0px",fontSize:"14px",borderRadius:"5px",width:"70px",color:"white"}} onClick={() => {handleDeleteButton(row?._id)}}>Delete</button>
                 </StyledTableCell>
               
               
